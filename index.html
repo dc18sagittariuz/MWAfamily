@@ -23,7 +23,320 @@
   <link rel="preload" as="style" href="assets/mobirise/css/mbr-additional.css?v=BUT7sJ"><link rel="stylesheet" href="assets/mobirise/css/mbr-additional.css?v=BUT7sJ" type="text/css">
 
   <style>
-    /* Lightbox Overlay */
+    /* ===== Modern Design Override ===== */
+    :root {
+      --blue:    #1a6fba;
+      --blue-lt: #e8f1fb;
+      --teal:    #0d9488;
+      --gray-50: #f8fafc;
+      --gray-100:#f1f5f9;
+      --gray-200:#e2e8f0;
+      --gray-500:#64748b;
+      --gray-700:#334155;
+      --gray-900:#0f172a;
+      --radius:  12px;
+      --shadow-sm: 0 1px 3px rgba(0,0,0,.08);
+      --shadow:    0 4px 20px rgba(0,0,0,.10);
+      --shadow-lg: 0 12px 40px rgba(0,0,0,.14);
+      --transition: .25s ease;
+    }
+
+    /* Body & typography */
+    body {
+      background: var(--gray-50);
+      color: var(--gray-700);
+      font-family: 'Mitr', sans-serif;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* ── Navbar: pill floats over hero ── */
+    #menu02-0 {
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      z-index: 1000;
+      background: transparent !important;
+    }
+    /* Make the pill container itself translucent */
+    .cid-tJS6tZXiPa .container {
+      background: rgba(255,255,255,.78) !important;
+      backdrop-filter: blur(12px) !important;
+      -webkit-backdrop-filter: blur(12px) !important;
+      box-shadow: 0 4px 24px rgba(0,0,0,.10) !important;
+    }
+    .menu .navbar {
+      background: transparent !important;
+      box-shadow: none !important;
+      padding: 0 1rem;
+      min-height: 64px;
+    }
+    .navbar-caption {
+      font-size: 1.05rem !important;
+      font-weight: 600 !important;
+      color: var(--blue) !important;
+      letter-spacing: -.01em;
+    }
+    .nav-link {
+      font-size: .9rem !important;
+      font-weight: 500 !important;
+      color: var(--gray-700) !important;
+      padding: .4rem .9rem !important;
+      border-radius: 8px;
+      transition: background var(--transition), color var(--transition);
+    }
+    .nav-link:hover {
+      background: var(--blue-lt);
+      color: var(--blue) !important;
+    }
+
+    /* ── Hero: show ~80% of image, overlap with navbar ── */
+    #header17-1i {
+      margin-top: 0 !important;
+      padding-top: 0 !important;
+      min-height: 70vh !important;
+      background-size: 80% auto !important;
+      background-position: center center !important;
+    }
+
+    /* ── About section ── */
+    #article02-1y {
+      background: #fff;
+      padding: 72px 0 !important;
+    }
+    #article02-1y .image-wrapper img {
+      border-radius: var(--radius);
+      box-shadow: var(--shadow-lg);
+      object-fit: cover;
+    }
+    #article02-1y .mbr-section-title {
+      font-size: clamp(1.6rem, 3vw, 2.2rem) !important;
+      color: var(--gray-900) !important;
+      font-weight: 700 !important;
+      line-height: 1.3;
+    }
+    #article02-1y .mbr-text {
+      font-size: 1rem !important;
+      color: var(--gray-500) !important;
+      line-height: 1.85;
+    }
+
+    /* ── Infographic section header ── */
+    #article11-20 {
+      background: var(--gray-100);
+      padding: 56px 0 32px !important;
+      text-align: center;
+    }
+    #article11-20 .mbr-section-title {
+      font-size: clamp(1.5rem, 2.5vw, 2rem) !important;
+      font-weight: 700 !important;
+      color: var(--gray-900) !important;
+    }
+    #article11-20 .mbr-section-subtitle {
+      color: var(--blue) !important;
+      font-weight: 500 !important;
+      font-size: .95rem !important;
+      letter-spacing: .02em;
+    }
+
+    /* ── Carousel ── */
+    #slider05-1z {
+      background: var(--gray-100);
+      padding-bottom: 64px !important;
+    }
+    #slider05-1z .carousel {
+      border-radius: var(--radius);
+      overflow: hidden;
+      box-shadow: var(--shadow-lg);
+    }
+    .carousel-item .item-wrapper img { border-radius: 0; }
+
+    /* ── Services ── */
+    #features016-1u {
+      background: #fff;
+      padding: 72px 0 !important;
+    }
+    #features016-1u .mbr-section-title {
+      font-size: clamp(1.5rem, 2.5vw, 2rem) !important;
+      font-weight: 700 !important;
+      color: var(--gray-900) !important;
+      margin-bottom: 0;
+    }
+    #features016-1u .item-wrapper {
+      border-radius: var(--radius);
+      box-shadow: var(--shadow-sm);
+      border: 1px solid var(--gray-200);
+      transition: box-shadow var(--transition), transform var(--transition);
+      background: #fff;
+      height: 100%;
+    }
+    #features016-1u .item-wrapper:hover {
+      box-shadow: var(--shadow);
+      transform: translateY(-4px);
+    }
+    #features016-1u .card-box { padding: 2rem 1.75rem; }
+    #features016-1u .image-wrapper img {
+      border-radius: 50%;
+      width: 80px !important;
+      height: 80px !important;
+      object-fit: cover;
+      box-shadow: 0 0 0 4px var(--blue-lt);
+    }
+    #features016-1u .card-title {
+      font-size: 1.1rem !important;
+      font-weight: 700 !important;
+      color: var(--gray-900) !important;
+    }
+    #features016-1u .card-text {
+      font-size: .9rem !important;
+      color: var(--gray-500) !important;
+    }
+
+    /* ── Contacts ── */
+    #contacts02-1p {
+      background: var(--gray-50);
+      padding: 72px 0 !important;
+    }
+    #contacts02-1p .mbr-section-title {
+      font-size: clamp(1.5rem, 2.5vw, 2rem) !important;
+      font-weight: 700 !important;
+      color: var(--gray-900) !important;
+    }
+    #contacts02-1p .card {
+      background: #fff;
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      border: none;
+      padding: 2rem;
+    }
+    #contacts02-1p .google-map iframe {
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      width: 100%;
+      height: 320px;
+    }
+    #contacts02-1p .cardTitle {
+      font-weight: 700 !important;
+      color: var(--blue) !important;
+      font-size: 1rem !important;
+    }
+    #contacts02-1p .list { padding-left: 0; list-style: none; }
+    #contacts02-1p .list li {
+      padding: .3rem 0;
+      font-size: .92rem;
+      color: var(--gray-700);
+      border-bottom: 1px solid var(--gray-100);
+    }
+    #contacts02-1p .list li:last-child { border: none; }
+
+    /* ── Social ── */
+    #social04-1q {
+      background: var(--gray-900);
+      padding: 56px 0 !important;
+    }
+    #social04-1q .mbr-section-title {
+      color: #fff !important;
+      font-size: 1.5rem !important;
+      font-weight: 700 !important;
+    }
+    #social04-1q .iconfont-wrapper {
+      border-radius: 50% !important;
+      width: 48px !important;
+      height: 48px !important;
+      display: inline-flex !important;
+      align-items: center;
+      justify-content: center;
+      transition: transform var(--transition), opacity var(--transition);
+    }
+    #social04-1q .iconfont-wrapper:hover { transform: translateY(-4px); opacity: .85; }
+
+    /* ── FAQ ── */
+    #list01-1s {
+      background: #fff;
+      padding: 72px 0 !important;
+    }
+    #list01-1s .mbr-section-title {
+      font-size: clamp(1.5rem, 2.5vw, 2rem) !important;
+      font-weight: 700 !important;
+      color: var(--gray-900) !important;
+    }
+    #list01-1s .card {
+      border: none !important;
+      border-radius: 0 !important;
+      border-bottom: 1px solid var(--gray-200) !important;
+      margin-bottom: 0;
+      box-shadow: none;
+      overflow: hidden;
+    }
+    #list01-1s .card:last-child {
+      border-bottom: none !important;
+    }
+    #list01-1s .card-header {
+      background: transparent !important;
+      border: none !important;
+      padding: 0 !important;
+    }
+    #list01-1s .panel-title {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 1.1rem 0;
+      text-decoration: none !important;
+      color: var(--gray-900) !important;
+    }
+    #list01-1s .panel-title-edit {
+      font-size: 1rem !important;
+      font-weight: 600 !important;
+    }
+    #list01-1s .panel-body { padding: 0 0 1.1rem; }
+    #list01-1s .panel-text {
+      font-size: .92rem !important;
+      color: var(--gray-500) !important;
+      line-height: 1.8;
+      margin: 0;
+    }
+    #list01-1s .sign { color: var(--gray-900) !important; }
+    /* FAQ icon from Mobirise theme override (white → black) */
+    .cid-vhFI5mUdCO .mbr-iconfont { color: var(--gray-900) !important; }
+
+    /* ── Footer ── */
+    #footer04-1r {
+      background: var(--gray-900) !important;
+      padding: 28px 0 !important;
+    }
+    #footer04-1r .mbr-text {
+      color: rgba(255,255,255,.55) !important;
+      font-size: .85rem !important;
+    }
+
+    /* Hide Mobirise branding strip */
+    body > section:last-of-type { display: none !important; }
+
+    /* Scroll-to-top button */
+    .scrollToTop {
+      background: rgba(100,116,139,.45) !important;
+      backdrop-filter: blur(6px);
+      border-radius: 50% !important;
+      box-shadow: none !important;
+      transition: background var(--transition);
+    }
+    .scrollToTop:hover {
+      background: rgba(100,116,139,.7) !important;
+    }
+
+    /* ── Services clickable card ── */
+    #features016-1u .item-wrapper {
+      position: relative;
+    }
+    #features016-1u .card-link-overlay {
+      position: absolute;
+      inset: 0;
+      z-index: 1;
+      border-radius: var(--radius);
+    }
+    #features016-1u .card-box {
+      padding: 1.5rem 1.5rem !important;
+    }
+
+    /* ===== Lightbox Overlay ===== */
     #infographic-lightbox {
       display: none;
       position: fixed;
@@ -277,50 +590,44 @@
       
       <div class="item features-without-image col-12 col-lg-4 active">
         <div class="item-wrapper">
+          <a class="card-link-overlay" href="https://www.mwa.co.th/services/business-service/water-analysis-business/" target="_blank" aria-label="Lab Services"></a>
           <div class="card-box">
             <div class="img-box">
               <div class="image-wrapper mb-3">
-                <a href="https://www.mwa.co.th/services/business-service/water-analysis-business/" target="_blank"><img src="assets/images/chatgpt20image20apr20272020262010-38-3220am-160x160.png" alt="Mobirise Website Builder" data-slide-to="3" data-bs-slide-to="3"></a>
+                <img src="assets/images/chatgpt20image20apr20272020262010-38-3220am-160x160.png" alt="Lab Services">
               </div>
             </div>
             <h3 class="card-title mbr-fonts-style mb-0 display-5">
               <strong>Lab Services</strong></h3>
             <h5 class="card-text mbr-fonts-style mt-3 display-7">
               บริการทดสอบคุณภาพน้ำ</h5>
-            <div class="link-wrap">
-              
-            </div>
           </div>
         </div>
       </div><div class="item features-without-image col-12 col-lg-4">
         <div class="item-wrapper">
+          <a class="card-link-overlay" href="https://www.facebook.com/mwa1125" target="_blank" aria-label="MWA 1 Stop Services"></a>
           <div class="card-box">
             <div class="img-box">
               <div class="image-wrapper mb-3">
-                <a href="https://www.facebook.com/mwa1125" target="_blank"><img src="assets/images/chatgpt20image20apr20272020262010-45-4520am-160x160.png" alt="Mobirise Website Builder" data-slide-to="0" data-bs-slide-to="0"></a>
+                <img src="assets/images/chatgpt20image20apr20272020262010-45-4520am-160x160.png" alt="MWA 1 Stop Services">
               </div>
             </div>
             <h3 class="card-title mbr-fonts-style mb-0 display-5"><strong>MWA 1 Stop Services</strong></h3>
             <h5 class="card-text mbr-fonts-style mt-3 display-7">
               บริการล้างถังพักน้ำ หาท่อแตกรั่ว ฯลฯ</h5>
-            <div class="link-wrap">
-              
-            </div>
           </div>
         </div>
       </div><div class="item features-without-image col-12 col-lg-4">
         <div class="item-wrapper">
+          <a class="card-link-overlay" href="https://twqonline.mwa.co.th/" target="_blank" aria-label="Real-time Monitoring"></a>
           <div class="card-box">
             <div class="img-box">
               <div class="image-wrapper mb-3">
-                <a href="https://twqonline.mwa.co.th/" target="_blank"><img src="assets/images/chatgpt20image20apr20272020262010-47-1420am-160x160.png" alt="Mobirise Website Builder" data-slide-to="1" data-bs-slide-to="1"></a>
+                <img src="assets/images/chatgpt20image20apr20272020262010-47-1420am-160x160.png" alt="Real-time Monitoring">
               </div>
             </div>
             <h3 class="card-title mbr-fonts-style mb-0 display-5"><strong>Real-time Monitoring</strong></h3>
             <h5 class="card-text mbr-fonts-style mt-3 display-7">ดูคุณภาพน้ำประปาออนไลน์แบบเรียลไทม์</h5>
-            <div class="link-wrap">
-              
-            </div>
           </div>
         </div>
       </div>
