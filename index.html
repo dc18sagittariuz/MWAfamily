@@ -88,13 +88,16 @@
       color: var(--blue) !important;
     }
 
-    /* ── Hero: show ~80% of image, overlap with navbar ── */
+    /* ── Hero: full-bleed cover image ── */
     #header17-1i {
       margin-top: 0 !important;
       padding-top: 0 !important;
       min-height: 70vh !important;
-      background-size: 80% auto !important;
-      background-position: center center !important;
+    }
+    /* Override Mobirise default background-size so image fills on mobile too */
+    .cid-vhFH16dV8l {
+      background-size: cover !important;
+      background-position: center top !important;
     }
 
     /* ── About section ── */
@@ -188,6 +191,18 @@
     #features016-1u .card-text {
       font-size: .9rem !important;
       color: var(--gray-500) !important;
+    }
+    @media (max-width: 767px) {
+      #features016-1u { padding: 40px 0 !important; }
+      #features016-1u .item-wrapper { margin-bottom: 0; }
+      #features016-1u .card-box { padding: 1rem 1.25rem !important; }
+      #features016-1u .image-wrapper img {
+        width: 56px !important;
+        height: 56px !important;
+      }
+      #features016-1u .card-title { font-size: .95rem !important; }
+      #features016-1u .card-text  { font-size: .82rem !important; }
+      #features016-1u .row { gap: .75rem; }
     }
 
     /* ── Contacts ── */
@@ -306,20 +321,34 @@
       color: rgba(255,255,255,.55) !important;
       font-size: .85rem !important;
     }
+    /* Hide footer text on mobile — shown on desktop only */
+    @media (max-width: 767px) {
+      #footer04-1r { display: none !important; }
+    }
 
     /* Hide Mobirise branding strip */
     body > section:last-of-type { display: none !important; }
 
     /* Scroll-to-top button */
+    #scrollToTop {
+      width: 44px !important;
+      height: 44px !important;
+      min-width: unset !important;
+      min-height: unset !important;
+      border-radius: 50% !important;
+      overflow: hidden;
+    }
     .scrollToTop {
-      background: rgba(100,116,139,.45) !important;
+      background: rgba(100,116,139,.5) !important;
       backdrop-filter: blur(6px);
       border-radius: 50% !important;
       box-shadow: none !important;
       transition: background var(--transition);
+      width: 44px !important;
+      height: 44px !important;
     }
     .scrollToTop:hover {
-      background: rgba(100,116,139,.7) !important;
+      background: rgba(100,116,139,.75) !important;
     }
 
     /* ── Services clickable card ── */
