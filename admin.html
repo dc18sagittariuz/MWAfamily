@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Infographic Admin</title>
+  <style>
+    body { font-family: sans-serif; max-width: 480px; margin: 60px auto; padding: 0 16px; color: #0f172a; }
+    h1 { font-size: 1.3rem; }
+    input[type="password"] { width: 100%; padding: .6rem; font-size: 1rem; box-sizing: border-box; }
+    button { margin-top: .75rem; padding: .6rem 1.2rem; font-size: 1rem; cursor: pointer; }
+    #gate-error { color: #b91c1c; margin-top: .5rem; min-height: 1.2em; }
+    #admin-app { display: none; }
+  </style>
+</head>
+<body>
+  <h1>Infographic Admin</h1>
+
+  <div id="gate">
+    <label for="gate-password">Access Password</label>
+    <input type="password" id="gate-password" autocomplete="off">
+    <div id="gate-error"></div>
+    <button id="gate-unlock">Unlock</button>
+  </div>
+
+  <div id="admin-app">
+    <p id="admin-status">Signed in as authorized admin.</p>
+    <section>
+      <h2>Upload New Infographic</h2>
+      <input type="file" id="upload-file" accept="image/*">
+      <div id="upload-preview"></div>
+      <button id="upload-btn" disabled>Upload</button>
+      <button id="retry-manifest-btn" style="display:none;">Retry list update</button>
+      <p id="upload-progress"></p>
+      <p id="upload-error" style="color:#b91c1c;"></p>
+    </section>
+    <section>
+      <h2>Current Infographics</h2>
+      <div id="current-list"></div>
+    </section>
+  </div>
+
+  <script src="assets/admin/github-api.js"></script>
+  <script>
+    (function () {
+      var STORAGE_KEY = 'mwa_admin_token';
+      var gate = document.getElementById('gate');
+      var app = document.getElementById('admin-app');
+      var passwordInput = document.getElementById('gate-password');
+      var errorEl = document.getElementById('gate-error');
+      var unlockBtn = document.getElementById('gate-unlock');
+
+      function showApp() {
+        gate.style.display = 'none';
+        app.style.display = 'block';
+        if (typeof window.refreshInfographicList === 'function') {
+          window.refreshInfographicList();
+        }
+      }
+
+      function tryUnlock(token) {
+        errorEl.textContent = '';
+        return GitHubAPI.validateToken(token).then(function (ok) {
+          if (ok) {
+            localStorage.setItem(STORAGE_KEY, token);
+            showApp();
+          } else {
+            errorEl.textContent = 'Invalid password / no access.';
+          }
+        }).catch(function () {
+          errorEl.textContent = 'Could not reach GitHub. Check your connection and try again.';
+        });
+      }
+
+      unlockBtn.addEventListener('click', function () {
+        var token = passwordInput.value.trim();
+        if (!token) {
+          errorEl.textContent = 'Enter your access password.';
+          return;
+        }
+        tryUnlock(token);
+      });
+
+      var savedToken = localStorage.getItem(STORAGE_KEY);
+      if (savedToken) {
+        tryUnlock(savedToken);
+      }
+    })();
+  </script>
+  <script src="assets/admin/manifest-utils.js"></script>
+  <script src="assets/admin/image-compress.js"></script>
+  <script>
+    (function () {
+      var MANIFEST_PATH = 'assets/images/infographics.json';
+      var IMAGES_DIR = 'assets/images/';
+
+      var fileInput = document.getElementById('upload-file');
+      var previewEl = document.getElementById('upload-preview');
+      var uploadBtn = document.getElementById('upload-btn');
+      var retryBtn = document.getElementById('retry-manifest-btn');
+      var progressEl = document.getElementById('upload-progress');
+      var errorEl = document.getElementById('upload-error');
+
+      var pendingBlob = null;
+      var lastFailedUpload = null;
+
+      function getToken() {
+        return localStorage.getItem('mwa_admin_token');
+      }
+
+      function updateManifestWithEntry(imagePath, filename) {
+        var token = getToken();
+        progressEl.textContent = 'Updating carousel list...';
+        errorEl.textContent = '';
+        retryBtn.style.display = 'none';
+
+        return GitHubAPI.getFile(MANIFEST_PATH, token).then(function (manifestFile) {
+          var manifest = manifestFile ? JSON.parse(atob(manifestFile.content)) : [];
+          var alreadyListed = manifest.some(function (m) { return m.file === imagePath; });
+          var updatedManifest = alreadyListed ? manifest : ManifestUtils.addEntry(manifest, { file: imagePath, alt: 'Infographic' });
+          return GitHubAPI.putFile(
+            MANIFEST_PATH,
+            btoa(JSON.stringify(updatedManifest, null, 2)),
+            'Add ' + filename + ' to infographics list',
+            token,
+            manifestFile ? manifestFile.sha : undefined
+          );
+        }).then(function () {
+          progressEl.textContent = 'Done, live in ~1 minute.';
+          lastFailedUpload = null;
+          fileInput.value = '';
+          previewEl.innerHTML = '';
+          pendingBlob = null;
+          if (typeof window.refreshInfographicList === 'function') {
+            window.refreshInfographicList();
+          }
+        }).catch(function (err) {
+          progressEl.textContent = '';
+          lastFailedUpload = { imagePath: imagePath, filename: filename };
+          errorEl.textContent = 'Image uploaded as ' + imagePath +
+            ' but the carousel list failed to update: ' + err.message + '.';
+          retryBtn.style.display = 'inline-block';
+        });
+      }
+
+      fileInput.addEventListener('change', function () {
+        var file = fileInput.files[0];
+        errorEl.textContent = '';
+        uploadBtn.disabled = true;
+        pendingBlob = null;
+        if (!file) return;
+
+        progressEl.textContent = 'Compressing...';
+        ImageCompress.compressImage(file, 1600, 0.82).then(function (blob) {
+          pendingBlob = blob;
+          previewEl.innerHTML = '';
+          var img = document.createElement('img');
+          img.style.maxWidth = '240px';
+          img.src = URL.createObjectURL(blob);
+          previewEl.appendChild(img);
+          uploadBtn.disabled = false;
+          progressEl.textContent = 'Ready to upload.';
+        }).catch(function (err) {
+          errorEl.textContent = err.message;
+          progressEl.textContent = '';
+        });
+      });
+
+      uploadBtn.addEventListener('click', function () {
+        if (!pendingBlob) return;
+        var token = getToken();
+        uploadBtn.disabled = true;
+        errorEl.textContent = '';
+        retryBtn.style.display = 'none';
+
+        GitHubAPI.getFile(MANIFEST_PATH, token).then(function (manifestFile) {
+          var manifest = manifestFile ? JSON.parse(atob(manifestFile.content)) : [];
+          var filename = ManifestUtils.generateFilename(new Date(), manifest.map(function (m) { return m.file; }));
+          var imagePath = IMAGES_DIR + filename;
+
+          progressEl.textContent = 'Uploading image...';
+          return ImageCompress.blobToBase64(pendingBlob).then(function (base64) {
+            return GitHubAPI.putFile(imagePath, base64, 'Add infographic ' + filename, token);
+          }).then(function () {
+            return updateManifestWithEntry(imagePath, filename);
+          });
+        }).catch(function (err) {
+          progressEl.textContent = '';
+          errorEl.textContent = err.message;
+        }).then(function () {
+          uploadBtn.disabled = false;
+        });
+      });
+
+      retryBtn.addEventListener('click', function () {
+        if (!lastFailedUpload) return;
+        updateManifestWithEntry(lastFailedUpload.imagePath, lastFailedUpload.filename);
+      });
+    })();
+  </script>
+  <script>
+    (function () {
+      var MANIFEST_PATH = 'assets/images/infographics.json';
+      var listEl = document.getElementById('current-list');
+
+      function getToken() {
+        return localStorage.getItem('mwa_admin_token');
+      }
+
+      function renderList(manifest) {
+        listEl.innerHTML = '';
+        manifest.forEach(function (entry) {
+          var item = document.createElement('div');
+          item.style.display = 'inline-block';
+          item.style.margin = '0 12px 12px 0';
+          item.style.textAlign = 'center';
+
+          var img = document.createElement('img');
+          img.src = entry.file;
+          img.style.width = '120px';
+          img.style.display = 'block';
+
+          var delBtn = document.createElement('button');
+          delBtn.textContent = 'Delete';
+          delBtn.addEventListener('click', function () {
+            if (!window.confirm('Delete this infographic?')) return;
+            deleteEntry(entry.file);
+          });
+
+          item.appendChild(img);
+          item.appendChild(delBtn);
+          listEl.appendChild(item);
+        });
+      }
+
+      function loadList() {
+        var token = getToken();
+        GitHubAPI.getFile(MANIFEST_PATH, token).then(function (manifestFile) {
+          var manifest = manifestFile ? JSON.parse(atob(manifestFile.content)) : [];
+          renderList(manifest);
+        });
+      }
+
+      function deleteEntry(file) {
+        var token = getToken();
+        GitHubAPI.getFile(MANIFEST_PATH, token).then(function (manifestFile) {
+          var manifest = manifestFile ? JSON.parse(atob(manifestFile.content)) : [];
+          var updatedManifest = ManifestUtils.removeEntry(manifest, file);
+          return GitHubAPI.putFile(
+            MANIFEST_PATH,
+            btoa(JSON.stringify(updatedManifest, null, 2)),
+            'Remove ' + file + ' from infographics list',
+            token,
+            manifestFile.sha
+          ).then(function () {
+            return GitHubAPI.getFile(file, token);
+          }).then(function (imageFile) {
+            if (imageFile) {
+              return GitHubAPI.deleteFile(file, imageFile.sha, 'Delete infographic ' + file, token);
+            }
+          });
+        }).then(function () {
+          loadList();
+        }).catch(function (err) {
+          window.alert('Delete failed: ' + err.message);
+          loadList();
+        });
+      }
+
+      window.refreshInfographicList = loadList;
+    })();
+  </script>
+</body>
+</html>

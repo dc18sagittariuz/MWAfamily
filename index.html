@@ -518,57 +518,12 @@
 </section>
 
 <section data-bs-version="5.1" class="slider05 cid-vhXDOSkMT1" id="slider05-1z">
-    
-
     <div class="container">
         <div class="row justify-content-center">
             <div class="col-12 col-md-6">
                 <div class="carousel slide carousel-fade" id="vhYvWmVi9Q" data-interval="5000" data-bs-interval="5000">
-                    <ol class="carousel-indicators">
-                        <li data-slide-to="0" data-bs-slide-to="0" class="active" data-target="#vhYvWmVi9Q" data-bs-target="#vhYvWmVi9Q"></li>
-                        <li data-slide-to="1" data-bs-slide-to="1" data-target="#vhYvWmVi9Q" data-bs-target="#vhYvWmVi9Q"></li>
-                        <li data-slide-to="2" data-bs-slide-to="2" data-target="#vhYvWmVi9Q" data-bs-target="#vhYvWmVi9Q"></li><li data-slide-to="3" data-bs-slide-to="3" data-target="#vhYvWmVi9Q" data-bs-target="#vhYvWmVi9Q"></li><li data-slide-to="4" data-bs-slide-to="4" data-target="#vhYvWmVi9Q" data-bs-target="#vhYvWmVi9Q"></li><li data-slide-to="5" data-bs-slide-to="5" data-target="#vhYvWmVi9Q" data-bs-target="#vhYvWmVi9Q"></li><li data-slide-to="6" data-bs-slide-to="6" data-target="#vhYvWmVi9Q" data-bs-target="#vhYvWmVi9Q"></li>
-                    </ol>
-                    <div class="carousel-inner">
-                        <div class="carousel-item slider-image item active">
-                            <div class="item-wrapper">
-                                
-                                <img class="d-block w-100" src="assets/images/6904.jpg" alt="Mobirise Website Builder" data-slide-to="0" data-bs-slide-to="0">
-                            </div>
-                        </div><div class="carousel-item slider-image item">
-                            <div class="item-wrapper">
-                                
-                                <img class="d-block w-100" src="assets/images/6903.jpg" alt="Mobirise Website Builder" data-slide-to="1" data-bs-slide-to="1">
-                            </div>
-                        </div><div class="carousel-item slider-image item">
-                            <div class="item-wrapper">
-                                
-                                <img class="d-block w-100" src="assets/images/6902.jpg" alt="Mobirise Website Builder" data-slide-to="2" data-bs-slide-to="2">
-                            </div>
-                        </div><div class="carousel-item slider-image item">
-                            <div class="item-wrapper">
-                                
-                                <img class="d-block w-100" src="assets/images/6901.jpg" alt="Mobirise Website Builder" data-slide-to="3" data-bs-slide-to="3">
-                            </div>
-                        </div><div class="carousel-item slider-image item">
-                            <div class="item-wrapper">
-                                
-                                <img class="d-block w-100" src="assets/images/6812.jpg" alt="Mobirise Website Builder" data-slide-to="4" data-bs-slide-to="4">
-                            </div>
-                        </div><div class="carousel-item slider-image item">
-                            <div class="item-wrapper">
-                                
-                                <img class="d-block w-100" src="assets/images/6811.jpg" alt="Mobirise Website Builder" data-slide-to="5" data-bs-slide-to="5">
-                            </div>
-                        </div><div class="carousel-item slider-image item">
-                            <div class="item-wrapper">
-                                
-                                <img class="d-block w-100" src="assets/images/6810.jpg" alt="Mobirise Website Builder" data-slide-to="6" data-bs-slide-to="6">
-                            </div>
-                        </div>
-                        
-                        
-                    </div>
+                    <ol class="carousel-indicators" id="infographic-carousel-indicators"></ol>
+                    <div class="carousel-inner" id="infographic-carousel-inner"></div>
                     <a class="carousel-control carousel-control-prev" role="button" data-slide="prev" data-bs-slide="prev" href="#vhYvWmVi9Q">
                         <span class="mobi-mbri mobi-mbri-arrow-prev" aria-hidden="true"></span>
                         <span class="sr-only visually-hidden">Previous</span>
@@ -824,18 +779,8 @@
       var nextBtn   = document.getElementById('lightbox-next');
       var counter   = document.getElementById('lightbox-counter');
 
-      var images = [];   // array of { src, alt }
+      var images = [];
       var currentIndex = 0;
-
-      // Collect all carousel images
-      document.querySelectorAll('.carousel-item .item-wrapper img').forEach(function (img) {
-        images.push({ src: img.src, alt: img.alt });
-        img.addEventListener('click', function (e) {
-          e.stopPropagation();
-          var idx = images.findIndex(function (o) { return o.src === img.src; });
-          openLightbox(idx >= 0 ? idx : 0);
-        });
-      });
 
       function openLightbox(idx) {
         currentIndex = idx;
@@ -867,18 +812,27 @@
         lightboxImg.src = '';
       }
 
-      // Buttons
+      function initInfographicLightbox() {
+        images = [];
+        document.querySelectorAll('.carousel-item .item-wrapper img').forEach(function (img) {
+          images.push({ src: img.src, alt: img.alt });
+          img.addEventListener('click', function (e) {
+            e.stopPropagation();
+            var idx = images.findIndex(function (o) { return o.src === img.src; });
+            openLightbox(idx >= 0 ? idx : 0);
+          });
+        });
+      }
+
       prevBtn.addEventListener('click', function (e) { e.stopPropagation(); showImage(currentIndex - 1); });
       nextBtn.addEventListener('click', function (e) { e.stopPropagation(); showImage(currentIndex + 1); });
       closeBtn.addEventListener('click', function (e) { e.stopPropagation(); closeLightbox(); });
 
-      // Close on overlay background click (not on buttons/img)
       lightbox.addEventListener('click', function (e) {
         if (e.target === lightbox) closeLightbox();
       });
       lightboxImg.addEventListener('click', function (e) { e.stopPropagation(); });
 
-      // Keyboard: arrow keys + Escape
       document.addEventListener('keydown', function (e) {
         if (!lightbox.classList.contains('active')) return;
         if (e.key === 'Escape')      closeLightbox();
@@ -886,7 +840,6 @@
         if (e.key === 'ArrowLeft')   showImage(currentIndex - 1);
       });
 
-      // Swipe support (touch devices)
       var touchStartX = 0;
       lightbox.addEventListener('touchstart', function (e) { touchStartX = e.changedTouches[0].screenX; }, { passive: true });
       lightbox.addEventListener('touchend', function (e) {
@@ -895,8 +848,11 @@
           diff > 0 ? showImage(currentIndex + 1) : showImage(currentIndex - 1);
         }
       });
+
+      window.initInfographicLightbox = initInfographicLightbox;
     })();
   </script>
+  <script src="assets/carousel-loader.js"></script>
 
   </body>
 </html>

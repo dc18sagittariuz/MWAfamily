@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html>
+<head><meta charset="UTF-8"><title>manifest-utils self-test</title></head>
+<body>
+  <pre id="results">Running...</pre>
+  <script src="manifest-utils.js"></script>
+  <script>
+    (function () {
+      var lines = [];
+      var failures = 0;
+
+      function assertEqual(actual, expected, label) {
+        var pass = JSON.stringify(actual) === JSON.stringify(expected);
+        if (!pass) failures += 1;
+        lines.push((pass ? 'PASS' : 'FAIL') + ' - ' + label +
+          (pass ? '' : ' (expected ' + JSON.stringify(expected) + ', got ' + JSON.stringify(actual) + ')'));
+      }
+
+      assertEqual(
+        ManifestUtils.generateFilename(new Date(2026, 6, 12), []),
+        'infographic-20260712-1.jpg',
+        'generateFilename with no existing files'
+      );
+
+      assertEqual(
+        ManifestUtils.generateFilename(new Date(2026, 6, 12), ['assets/images/infographic-20260712-1.jpg']),
+        'infographic-20260712-2.jpg',
+        'generateFilename skips existing name'
+      );
+
+      var original = [{ file: 'a.jpg', alt: 'x' }];
+      var added = ManifestUtils.addEntry(original, { file: 'b.jpg', alt: 'y' });
+      assertEqual(added, [{ file: 'a.jpg', alt: 'x' }, { file: 'b.jpg', alt: 'y' }], 'addEntry appends entry');
+      assertEqual(original, [{ file: 'a.jpg', alt: 'x' }], 'addEntry does not mutate original');
+
+      var withTwo = [{ file: 'a.jpg', alt: 'x' }, { file: 'b.jpg', alt: 'y' }];
+      var removed = ManifestUtils.removeEntry(withTwo, 'a.jpg');
+      assertEqual(removed, [{ file: 'b.jpg', alt: 'y' }], 'removeEntry removes matching file');
+
+      document.getElementById('results').textContent =
+        lines.join('\n') + '\n\n' + (failures === 0 ? 'All tests passed' : failures + ' test(s) FAILED');
+    })();
+  </script>
+</body>
+</html>
