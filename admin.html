@@ -17,10 +17,25 @@
   <h1>Infographic Admin</h1>
 
   <div id="gate">
-    <label for="gate-password">Access Password</label>
-    <input type="password" id="gate-password" autocomplete="off">
-    <div id="gate-error"></div>
-    <button id="gate-unlock">Unlock</button>
+    <div id="gate-setup">
+      <p>First time here — enter your GitHub token once, then choose a short PIN for future visits.</p>
+      <label for="setup-token">GitHub Token</label>
+      <input type="password" id="setup-token" autocomplete="off">
+      <label for="setup-pin">Choose a PIN (min 4 characters)</label>
+      <input type="password" id="setup-pin" autocomplete="off">
+      <label for="setup-pin-confirm">Confirm PIN</label>
+      <input type="password" id="setup-pin-confirm" autocomplete="off">
+      <div id="setup-error" style="color:#b91c1c; margin-top:.5rem; min-height:1.2em;"></div>
+      <button id="setup-save">Save</button>
+    </div>
+
+    <div id="gate-pin" style="display:none;">
+      <label for="pin-input">Enter PIN</label>
+      <input type="password" id="pin-input" autocomplete="off">
+      <div id="pin-error" style="color:#b91c1c; margin-top:.5rem; min-height:1.2em;"></div>
+      <button id="pin-unlock">Unlock</button>
+      <p><a href="#" id="pin-forgot">Forgot PIN? Reset</a></p>
+    </div>
   </div>
 
   <div id="admin-app">
@@ -41,14 +56,31 @@
   </div>
 
   <script src="assets/admin/github-api.js"></script>
+  <script src="assets/admin/crypto-vault.js"></script>
   <script>
     (function () {
-      var STORAGE_KEY = 'mwa_admin_token';
+      var VAULT_KEY = 'mwa_admin_vault';
+      var currentToken = null;
+
+      window.getAdminToken = function () {
+        return currentToken;
+      };
+
       var gate = document.getElementById('gate');
       var app = document.getElementById('admin-app');
-      var passwordInput = document.getElementById('gate-password');
-      var errorEl = document.getElementById('gate-error');
-      var unlockBtn = document.getElementById('gate-unlock');
+      var setupView = document.getElementById('gate-setup');
+      var pinView = document.getElementById('gate-pin');
+
+      var setupTokenInput = document.getElementById('setup-token');
+      var setupPinInput = document.getElementById('setup-pin');
+      var setupPinConfirmInput = document.getElementById('setup-pin-confirm');
+      var setupError = document.getElementById('setup-error');
+      var setupSaveBtn = document.getElementById('setup-save');
+
+      var pinInput = document.getElementById('pin-input');
+      var pinError = document.getElementById('pin-error');
+      var pinUnlockBtn = document.getElementById('pin-unlock');
+      var pinForgotLink = document.getElementById('pin-forgot');
 
       function showApp() {
         gate.style.display = 'none';
@@ -58,32 +90,97 @@
         }
       }
 
-      function tryUnlock(token) {
-        errorEl.textContent = '';
-        return GitHubAPI.validateToken(token).then(function (ok) {
-          if (ok) {
-            localStorage.setItem(STORAGE_KEY, token);
-            showApp();
-          } else {
-            errorEl.textContent = 'Invalid password / no access.';
-          }
-        }).catch(function () {
-          errorEl.textContent = 'Could not reach GitHub. Check your connection and try again.';
-        });
+      function showSetup() {
+        setupView.style.display = 'block';
+        pinView.style.display = 'none';
       }
 
-      unlockBtn.addEventListener('click', function () {
-        var token = passwordInput.value.trim();
+      function showPinEntry() {
+        setupView.style.display = 'none';
+        pinView.style.display = 'block';
+      }
+
+      function getVault() {
+        var raw = localStorage.getItem(VAULT_KEY);
+        if (!raw) return null;
+        try {
+          return JSON.parse(raw);
+        } catch (e) {
+          return null;
+        }
+      }
+
+      setupSaveBtn.addEventListener('click', function () {
+        var token = setupTokenInput.value.trim();
+        var pin = setupPinInput.value;
+        var pinConfirm = setupPinConfirmInput.value;
+        setupError.textContent = '';
+
         if (!token) {
-          errorEl.textContent = 'Enter your access password.';
+          setupError.textContent = 'Enter your GitHub token.';
           return;
         }
-        tryUnlock(token);
+        if (pin.length < 4) {
+          setupError.textContent = 'PIN must be at least 4 characters.';
+          return;
+        }
+        if (pin !== pinConfirm) {
+          setupError.textContent = 'PIN and confirmation do not match.';
+          return;
+        }
+
+        GitHubAPI.validateToken(token).then(function (ok) {
+          if (!ok) {
+            setupError.textContent = 'Invalid password / no access.';
+            return;
+          }
+          return CryptoVault.encryptToken(token, pin).then(function (vault) {
+            localStorage.setItem(VAULT_KEY, JSON.stringify(vault));
+            currentToken = token;
+            showApp();
+          });
+        }).catch(function () {
+          setupError.textContent = 'Could not reach GitHub. Check your connection and try again.';
+        });
       });
 
-      var savedToken = localStorage.getItem(STORAGE_KEY);
-      if (savedToken) {
-        tryUnlock(savedToken);
+      pinUnlockBtn.addEventListener('click', function () {
+        var pin = pinInput.value;
+        pinError.textContent = '';
+        var vault = getVault();
+        if (!vault) {
+          showSetup();
+          return;
+        }
+
+        CryptoVault.decryptToken(vault, pin).then(function (token) {
+          return GitHubAPI.validateToken(token).then(function (ok) {
+            if (!ok) {
+              pinError.textContent = 'Your saved token is no longer valid. Reset and enter a new one.';
+              return;
+            }
+            currentToken = token;
+            showApp();
+          });
+        }).catch(function () {
+          pinError.textContent = 'Incorrect PIN.';
+        });
+      });
+
+      pinForgotLink.addEventListener('click', function (e) {
+        e.preventDefault();
+        if (!window.confirm('Reset saved admin access? You will need to re-enter your GitHub token.')) return;
+        localStorage.removeItem(VAULT_KEY);
+        pinInput.value = '';
+        pinError.textContent = '';
+        showSetup();
+      });
+
+      var existingVault = getVault();
+      if (existingVault) {
+        showPinEntry();
+      } else {
+        showSetup();
       }
     })();
   </script>
@@ -105,7 +202,7 @@
       var lastFailedUpload = null;
 
       function getToken() {
-        return localStorage.getItem('mwa_admin_token');
+        return window.getAdminToken();
       }
 
       function updateManifestWithEntry(imagePath, filename) {
@@ -204,7 +301,7 @@
       var listEl = document.getElementById('current-list');
 
       function getToken() {
-        return localStorage.getItem('mwa_admin_token');
+        return window.getAdminToken();
       }
 
       function renderList(manifest) {
