@@ -1,5 +1,9 @@
 [
   {
+    "file": "assets/images/infographic-20260712-1.jpg",
+    "alt": "Infographic"
+  },
+  {
     "file": "assets/images/6904.jpg",
     "alt": "Infographic"
   },
@@ -25,10 +29,6 @@
   },
   {
     "file": "assets/images/6810.jpg",
-    "alt": "Infographic"
-  },
-  {
-    "file": "assets/images/infographic-20260712-1.jpg",
     "alt": "Infographic"
   }
 ]
