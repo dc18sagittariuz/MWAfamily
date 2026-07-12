@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html>
+<head><meta charset="UTF-8"><title>crypto-vault self-test</title></head>
+<body>
+  <pre id="results">Running...</pre>
+  <script src="crypto-vault.js"></script>
+  <script>
+    (function () {
+      var lines = [];
+      var failures = 0;
+
+      function record(pass, label, extra) {
+        if (!pass) failures += 1;
+        lines.push((pass ? 'PASS' : 'FAIL') + ' - ' + label + (extra ? ' (' + extra + ')' : ''));
+      }
+
+      function finish() {
+        document.getElementById('results').textContent =
+          lines.join('\n') + '\n\n' + (failures === 0 ? 'All tests passed' : failures + ' test(s) FAILED');
+      }
+
+      CryptoVault.encryptToken('my-secret-github-token', '1234')
+        .then(function (vault) {
+          record(
+            typeof vault.salt === 'string' && typeof vault.iv === 'string' && typeof vault.ciphertext === 'string',
+            'encryptToken returns base64 salt/iv/ciphertext'
+          );
+
+          return CryptoVault.decryptToken(vault, '1234').then(function (decrypted) {
+            record(decrypted === 'my-secret-github-token', 'correct PIN round-trips the original token', 'got "' + decrypted + '"');
+          }).then(function () {
+            return CryptoVault.decryptToken(vault, '9999').then(function () {
+              record(false, 'wrong PIN is rejected', 'decrypt unexpectedly succeeded');
+            }).catch(function () {
+              record(true, 'wrong PIN is rejected');
+            });
+          });
+        })
+        .then(finish)
+        .catch(function (e) {
+          record(false, 'unexpected exception during test run', e.message);
+          finish();
+        });
+    })();
+  </script>
+</body>
+</html>
