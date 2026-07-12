@@ -1,9 +1,34 @@
 [
-  { "file": "assets/images/6904.jpg", "alt": "Infographic" },
-  { "file": "assets/images/6903.jpg", "alt": "Infographic" },
-  { "file": "assets/images/6902.jpg", "alt": "Infographic" },
-  { "file": "assets/images/6901.jpg", "alt": "Infographic" },
-  { "file": "assets/images/6812.jpg", "alt": "Infographic" },
-  { "file": "assets/images/6811.jpg", "alt": "Infographic" },
-  { "file": "assets/images/6810.jpg", "alt": "Infographic" }
+  {
+    "file": "assets/images/6904.jpg",
+    "alt": "Infographic"
+  },
+  {
+    "file": "assets/images/6903.jpg",
+    "alt": "Infographic"
+  },
+  {
+    "file": "assets/images/6902.jpg",
+    "alt": "Infographic"
+  },
+  {
+    "file": "assets/images/6901.jpg",
+    "alt": "Infographic"
+  },
+  {
+    "file": "assets/images/6812.jpg",
+    "alt": "Infographic"
+  },
+  {
+    "file": "assets/images/6811.jpg",
+    "alt": "Infographic"
+  },
+  {
+    "file": "assets/images/6810.jpg",
+    "alt": "Infographic"
+  },
+  {
+    "file": "assets/images/infographic-20260712-1.jpg",
+    "alt": "Infographic"
+  }
 ]
