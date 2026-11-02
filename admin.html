@@ -3,6 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex, nofollow">
   <title>Infographic Admin</title>
   <style>
     body { font-family: sans-serif; max-width: 480px; margin: 60px auto; padding: 0 16px; color: #0f172a; }
@@ -21,7 +22,7 @@
       <p>First time here — enter your GitHub token once, then choose a short PIN for future visits.</p>
       <label for="setup-token">GitHub Token</label>
       <input type="password" id="setup-token" autocomplete="off">
-      <label for="setup-pin">Choose a PIN (min 4 characters)</label>
+      <label for="setup-pin">Choose a PIN (min 6 characters)</label>
       <input type="password" id="setup-pin" autocomplete="off">
       <label for="setup-pin-confirm">Confirm PIN</label>
       <input type="password" id="setup-pin-confirm" autocomplete="off">
@@ -120,8 +121,8 @@
           setupError.textContent = 'Enter your GitHub token.';
           return;
         }
-        if (pin.length < 4) {
-          setupError.textContent = 'PIN must be at least 4 characters.';
+        if (pin.length < 6) {
+          setupError.textContent = 'PIN must be at least 6 characters.';
           return;
         }
         if (pin !== pinConfirm) {
@@ -161,8 +162,10 @@
             }
             currentToken = token;
             showApp();
+          }, function () {
+            pinError.textContent = 'Could not reach GitHub. Check your connection and try again.';
           });
-        }).catch(function () {
+        }, function () {
           pinError.textContent = 'Incorrect PIN.';
         });
       });
@@ -212,12 +215,12 @@
         retryBtn.style.display = 'none';
 
         return GitHubAPI.getFile(MANIFEST_PATH, token).then(function (manifestFile) {
-          var manifest = manifestFile ? JSON.parse(atob(manifestFile.content)) : [];
+          var manifest = GitHubAPI.readJSON(manifestFile, []);
           var alreadyListed = manifest.some(function (m) { return m.file === imagePath; });
           var updatedManifest = alreadyListed ? manifest : ManifestUtils.addEntry(manifest, { file: imagePath, alt: 'Infographic' });
           return GitHubAPI.putFile(
             MANIFEST_PATH,
-            btoa(JSON.stringify(updatedManifest, null, 2)),
+            GitHubAPI.encodeJSON(updatedManifest),
             'Add ' + filename + ' to infographics list',
             token,
             manifestFile ? manifestFile.sha : undefined
@@ -271,7 +274,7 @@
         retryBtn.style.display = 'none';
 
         GitHubAPI.getFile(MANIFEST_PATH, token).then(function (manifestFile) {
-          var manifest = manifestFile ? JSON.parse(atob(manifestFile.content)) : [];
+          var manifest = GitHubAPI.readJSON(manifestFile, []);
           var filename = ManifestUtils.generateFilename(new Date(), manifest.map(function (m) { return m.file; }));
           var imagePath = IMAGES_DIR + filename;
 
@@ -285,7 +288,7 @@
           progressEl.textContent = '';
           errorEl.textContent = err.message;
         }).then(function () {
-          uploadBtn.disabled = false;
+          uploadBtn.disabled = !pendingBlob || !!lastFailedUpload;
         });
       });
 
@@ -333,22 +336,24 @@
       function loadList() {
         var token = getToken();
         GitHubAPI.getFile(MANIFEST_PATH, token).then(function (manifestFile) {
-          var manifest = manifestFile ? JSON.parse(atob(manifestFile.content)) : [];
+          var manifest = GitHubAPI.readJSON(manifestFile, []);
           renderList(manifest);
+        }).catch(function (err) {
+          listEl.textContent = 'Could not load the current list: ' + err.message;
         });
       }
 
       function deleteEntry(file) {
         var token = getToken();
         GitHubAPI.getFile(MANIFEST_PATH, token).then(function (manifestFile) {
-          var manifest = manifestFile ? JSON.parse(atob(manifestFile.content)) : [];
+          var manifest = GitHubAPI.readJSON(manifestFile, []);
           var updatedManifest = ManifestUtils.removeEntry(manifest, file);
           return GitHubAPI.putFile(
             MANIFEST_PATH,
-            btoa(JSON.stringify(updatedManifest, null, 2)),
+            GitHubAPI.encodeJSON(updatedManifest),
             'Remove ' + file + ' from infographics list',
             token,
-            manifestFile.sha
+            manifestFile ? manifestFile.sha : undefined
           ).then(function () {
             return GitHubAPI.getFile(file, token);
           }).then(function (imageFile) {

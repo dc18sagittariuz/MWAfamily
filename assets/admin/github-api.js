@@ -58,7 +58,34 @@
     });
   }
 
+  // UTF-8 safe base64 helpers (plain btoa/atob break on Thai text)
+  function encodeText(text) {
+    var bytes = new TextEncoder().encode(text);
+    var binary = '';
+    for (var i = 0; i < bytes.length; i++) binary += String.fromCharCode(bytes[i]);
+    return btoa(binary);
+  }
+
+  function decodeText(base64) {
+    var binary = atob(base64.replace(/\s/g, ''));
+    var bytes = new Uint8Array(binary.length);
+    for (var i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
+    return new TextDecoder().decode(bytes);
+  }
+
+  function readJSON(file, fallback) {
+    return file ? JSON.parse(decodeText(file.content)) : fallback;
+  }
+
+  function encodeJSON(value) {
+    return encodeText(JSON.stringify(value, null, 2) + '\n');
+  }
+
   global.GitHubAPI = {
+    encodeText: encodeText,
+    decodeText: decodeText,
+    readJSON: readJSON,
+    encodeJSON: encodeJSON,
     validateToken: validateToken,
     getFile: getFile,
     putFile: putFile,

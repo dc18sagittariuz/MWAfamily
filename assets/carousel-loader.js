@@ -1,12 +1,18 @@
 (function () {
   'use strict';
 
+  function esc(value) {
+    return String(value == null ? '' : value)
+      .replace(/&/g, '&amp;').replace(/"/g, '&quot;')
+      .replace(/</g, '&lt;').replace(/>/g, '&gt;');
+  }
+
   function buildCarouselMarkup(manifest) {
     var inner = manifest.map(function (item, idx) {
       return (
         '<div class="carousel-item slider-image item' + (idx === 0 ? ' active' : '') + '">' +
           '<div class="item-wrapper">' +
-            '<img class="d-block w-100" src="' + item.file + '" alt="' + item.alt + '" ' +
+            '<img class="d-block w-100" src="' + esc(item.file) + '" alt="' + esc(item.alt) + '" loading="' + (idx === 0 ? 'eager' : 'lazy') + '" ' +
             'data-slide-to="' + idx + '" data-bs-slide-to="' + idx + '">' +
           '</div>' +
         '</div>'
