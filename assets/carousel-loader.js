@@ -1,6 +1,14 @@
 (function () {
   'use strict';
 
+  // Only the first slides are shown on the homepage; the rest stay in the
+  // list for the admin. Keep in sync with HOMEPAGE_LIMIT in assets/admin/manifest-utils.js.
+  var MAX_SLIDES = 8;
+
+  function captionOf(item) {
+    return item && item.alt && item.alt !== 'Infographic' ? item.alt : '';
+  }
+
   function esc(value) {
     return String(value == null ? '' : value)
       .replace(/&/g, '&amp;').replace(/"/g, '&quot;')
@@ -45,12 +53,22 @@
           section.style.display = 'none';
           return;
         }
+        manifest = manifest.slice(0, MAX_SLIDES);
         var markup = buildCarouselMarkup(manifest);
         innerEl.innerHTML = markup.inner;
         indicatorsEl.innerHTML = markup.indicators;
 
+        var carouselEl = document.getElementById('vhYvWmVi9Q');
+        var captionEl = document.getElementById('infographic-caption');
+        if (captionEl) {
+          captionEl.textContent = captionOf(manifest[0]);
+          carouselEl.addEventListener('slid.bs.carousel', function (e) {
+            captionEl.textContent = captionOf(manifest[e.to]);
+          });
+        }
+
         if (window.bootstrap && window.bootstrap.Carousel) {
-          new window.bootstrap.Carousel(document.getElementById('vhYvWmVi9Q'));
+          new window.bootstrap.Carousel(carouselEl);
         }
 
         if (typeof window.initInfographicLightbox === 'function') {

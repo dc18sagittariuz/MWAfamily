@@ -29,7 +29,31 @@
     });
   }
 
+  // Number of infographics shown on the homepage carousel.
+  // Keep in sync with MAX_SLIDES in assets/carousel-loader.js.
+  var HOMEPAGE_LIMIT = 8;
+
+  function moveItem(list, index, delta) {
+    var target = index + delta;
+    if (index < 0 || index >= list.length || target < 0 || target >= list.length) {
+      return list.slice();
+    }
+    var copy = list.slice();
+    var item = copy.splice(index, 1)[0];
+    copy.splice(target, 0, item);
+    return copy;
+  }
+
+  // Old entries were saved with the placeholder alt "Infographic".
+  function titleOf(entry) {
+    var alt = (entry && entry.alt) || '';
+    return alt === 'Infographic' ? '' : alt;
+  }
+
   global.ManifestUtils = {
+    HOMEPAGE_LIMIT: HOMEPAGE_LIMIT,
+    moveItem: moveItem,
+    titleOf: titleOf,
     generateFilename: generateFilename,
     addEntry: addEntry,
     removeEntry: removeEntry

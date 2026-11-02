@@ -14,6 +14,9 @@
           canvas.width = Math.round(img.width * scale);
           canvas.height = Math.round(img.height * scale);
           var ctx = canvas.getContext('2d');
+          // JPEG has no transparency: paint white first so transparent PNGs don't turn black
+          ctx.fillStyle = '#ffffff';
+          ctx.fillRect(0, 0, canvas.width, canvas.height);
           ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
           canvas.toBlob(function (blob) {
             if (!blob) { reject(new Error('Compression failed')); return; }

@@ -18,7 +18,9 @@
   }
 
   function getFile(path, token) {
-    return fetch(API_BASE + '/contents/' + path, { headers: authHeaders(token) })
+    // no-store: GitHub caches contents responses for ~60s, which would hand
+    // back a stale sha right after a save.
+    return fetch(API_BASE + '/contents/' + path, { headers: authHeaders(token), cache: 'no-store' })
       .then(function (res) {
         if (res.status === 404) return null;
         if (!res.ok) throw new Error('Failed to load ' + path + ': ' + res.status);
@@ -58,6 +60,53 @@
     });
   }
 
+  function api(method, path, token, body) {
+    var opts = { method: method, headers: authHeaders(token), cache: 'no-store' };
+    if (body !== undefined) {
+      opts.headers = Object.assign({ 'Content-Type': 'application/json' }, opts.headers);
+      opts.body = JSON.stringify(body);
+    }
+    return fetch(API_BASE + path, opts).then(function (res) {
+      if (!res.ok) {
+        return res.json().catch(function () { return {}; }).then(function (err) {
+          throw new Error(method + ' ' + path + ' failed: ' + (err.message || res.status));
+        });
+      }
+      return res.json();
+    });
+  }
+
+  // Write several files (and delete others) as ONE commit using the Git Data API.
+  // opts: { branch, message, files: [{ path, base64 }], deletions: [path] }
+  function commitChanges(token, opts) {
+    var branch = opts.branch || 'main';
+    var files = opts.files || [];
+    var deletions = opts.deletions || [];
+    var headSha;
+
+    return api('GET', '/git/ref/heads/' + branch, token).then(function (ref) {
+      headSha = ref.object.sha;
+      return api('GET', '/git/commits/' + headSha, token);
+    }).then(function (headCommit) {
+      return Promise.all(files.map(function (f) {
+        return api('POST', '/git/blobs', token, { content: f.base64, encoding: 'base64' })
+          .then(function (blob) {
+            return { path: f.path, mode: '100644', type: 'blob', sha: blob.sha };
+          });
+      })).then(function (entries) {
+        deletions.forEach(function (path) {
+          entries.push({ path: path, mode: '100644', type: 'blob', sha: null });
+        });
+        return api('POST', '/git/trees', token, { base_tree: headCommit.tree.sha, tree: entries });
+      });
+    }).then(function (tree) {
+      return api('POST', '/git/commits', token, { message: opts.message, tree: tree.sha, parents: [headSha] });
+    }).then(function (commit) {
+      return api('PATCH', '/git/refs/heads/' + branch, token, { sha: commit.sha, force: false })
+        .then(function () { return commit; });
+    });
+  }
+
   // UTF-8 safe base64 helpers (plain btoa/atob break on Thai text)
   function encodeText(text) {
     var bytes = new TextEncoder().encode(text);
@@ -82,6 +131,7 @@
   }
 
   global.GitHubAPI = {
+    commitChanges: commitChanges,
     encodeText: encodeText,
     decodeText: decodeText,
     readJSON: readJSON,

@@ -37,6 +37,15 @@
       var removed = ManifestUtils.removeEntry(withTwo, 'a.jpg');
       assertEqual(removed, [{ file: 'b.jpg', alt: 'y' }], 'removeEntry removes matching file');
 
+      var abc = ['a', 'b', 'c'];
+      assertEqual(ManifestUtils.moveItem(abc, 2, -1), ['a', 'c', 'b'], 'moveItem moves up');
+      assertEqual(ManifestUtils.moveItem(abc, 0, 1), ['b', 'a', 'c'], 'moveItem moves down');
+      assertEqual(ManifestUtils.moveItem(abc, 0, -1), ['a', 'b', 'c'], 'moveItem ignores out-of-range');
+      assertEqual(abc, ['a', 'b', 'c'], 'moveItem does not mutate original');
+
+      assertEqual(ManifestUtils.titleOf({ file: 'a.jpg', alt: 'Infographic' }), '', 'titleOf hides placeholder alt');
+      assertEqual(ManifestUtils.titleOf({ file: 'a.jpg', alt: 'คลอรีน' }), 'คลอรีน', 'titleOf returns Thai title');
+
       document.getElementById('results').textContent =
         lines.join('\n') + '\n\n' + (failures === 0 ? 'All tests passed' : failures + ' test(s) FAILED');
     })();
