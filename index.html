@@ -285,6 +285,25 @@
     }
     #social04-1q .iconfont-wrapper:hover { transform: translateY(-4px); opacity: .85; }
 
+    /* ── Visitor counter ── */
+    #visitor-count {
+      margin: 1.75rem auto 0;
+      text-align: center;
+      font-size: .9rem;
+      color: rgba(255,255,255,.7);
+      min-height: 1.4em;
+    }
+    #visitor-count .vc-num {
+      display: inline-block;
+      margin: 0 .35rem;
+      padding: .15rem .75rem;
+      border-radius: 999px;
+      background: rgba(255,255,255,.1);
+      color: #fff;
+      font-weight: 600;
+      letter-spacing: .03em;
+    }
+
     /* ── FAQ ── */
     #list01-1s {
       background: #fff;
@@ -693,6 +712,7 @@
                     </a>
                     
                 </div>
+                <p id="visitor-count" aria-live="polite"></p>
             </div>
         </div>
     </div>
@@ -879,6 +899,26 @@
     })();
   </script>
   <script src="assets/carousel-loader.js"></script>
+
+  <!-- GoatCounter: visitor tracking + counter display -->
+  <script data-goatcounter="https://mwafamily.goatcounter.com/count"
+          async src="//gc.zgo.at/count.js"></script>
+  <script>
+    (function () {
+      var el = document.getElementById('visitor-count');
+      if (!el || !window.fetch) return;
+      // Wait a moment so this visit is counted before reading the total
+      setTimeout(function () {
+        fetch('https://mwafamily.goatcounter.com/counter/TOTAL.json')
+          .then(function (r) { if (!r.ok) throw new Error(r.status); return r.json(); })
+          .then(function (d) {
+            el.innerHTML = 'ผู้เข้าชมทั้งหมด<span class="vc-num"></span>ครั้ง';
+            el.querySelector('.vc-num').textContent = d.count;
+          })
+          .catch(function () { el.style.display = 'none'; });
+      }, 1200);
+    })();
+  </script>
 
   </body>
 </html>
