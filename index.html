@@ -285,23 +285,37 @@
     }
     #social04-1q .iconfont-wrapper:hover { transform: translateY(-4px); opacity: .85; }
 
-    /* ── Visitor counter ── */
+    /* ── Visitor counter (fixed, bottom-left) ── */
     #visitor-count {
-      margin: 1.75rem auto 0;
-      text-align: center;
-      font-size: .9rem;
-      color: rgba(255,255,255,.7);
-      min-height: 1.4em;
-    }
-    #visitor-count .vc-num {
-      display: inline-block;
-      margin: 0 .35rem;
-      padding: .15rem .75rem;
+      position: fixed;
+      left: 16px;
+      bottom: 16px;
+      z-index: 900;
+      margin: 0;
+      padding: .35rem .85rem;
       border-radius: 999px;
-      background: rgba(255,255,255,.1);
+      background: rgba(15,23,42,.82);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+      box-shadow: 0 4px 16px rgba(0,0,0,.18);
+      color: rgba(255,255,255,.8);
+      font-size: .8rem;
+      line-height: 1.4;
+      pointer-events: none;
+      visibility: visible !important;
+      opacity: 1 !important;
+      transform: none !important;
+      animation: none !important;
+    }
+    #visitor-count:empty { display: none; }
+    #visitor-count .vc-num {
+      margin: 0 .3rem;
       color: #fff;
       font-weight: 600;
       letter-spacing: .03em;
+    }
+    @media (max-width: 767px) {
+      #visitor-count { left: 10px; bottom: 10px; font-size: .72rem; padding: .3rem .7rem; }
     }
 
     /* ── FAQ ── */
@@ -712,7 +726,6 @@
                     </a>
                     
                 </div>
-                <p id="visitor-count" aria-live="polite"></p>
             </div>
         </div>
     </div>
@@ -899,6 +912,8 @@
     })();
   </script>
   <script src="assets/carousel-loader.js"></script>
+
+  <p id="visitor-count" aria-live="polite"></p>
 
   <!-- GoatCounter: visitor tracking + counter display -->
   <script data-goatcounter="https://mwafamily.goatcounter.com/count"
